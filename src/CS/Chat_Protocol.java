@@ -4,71 +4,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map.Entry;
+
+
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 
 public class Chat_Protocol {
 
 	
-	public Protocol_Messages Parse_Client_Msg(String Msg1,String Msg2,String Msg3,String Msg4, PrintStream printStream) {
-		Protocol_Messages Message = new Protocol_Messages();
-		if(Msg1.startsWith("JOIN_CHATROOM") && Msg2.startsWith("CLIENT_IP") && Msg3.startsWith("PORT") && Msg4.startsWith("CLIENT_NAME")) 
-		
-		{
-
-			String Split_Msg[] = Msg1.split(": ");
-			String Msg1Val = Split_Msg[1];
-			Split_Msg = Msg2.split(": ");
-			String Msg2Val = Split_Msg[1];
-			Split_Msg = Msg3.split(": ");
-			String Msg3Val = Split_Msg[1];
-			Split_Msg = Msg4.split(": ");
-			String Msg4Val = Split_Msg[1];
-
-
-			//To check if chat room is there or not
-			
-			if(!ChatRoom_Client_Info.Name_Chat_Room.containsKey(Msg1Val))
-			{
-				ChatRoom_Client_Info.Name_Chat_Room.put(Msg1Val, ChatRoom_Client_Info.Unique_ChatRoom_ID);
-				ChatRoom_Client_Info.Unique_ChatRoom_ID++;
-			}
-			Message.setJOIN_CHATROOM(Msg1Val);
-			Message.setCLIENT_IP(Msg2Val);
-			Message.setPORT(Msg3Val);
-			Message.setCLIENT_NAME(Msg4Val);
-
-		
-				ChatRoom_Client_Info.Message_Send_Client.put(Integer.parseInt(String.valueOf(Thread.currentThread().getId())),printStream);
-			
-				ChatRoom_Client_Info.CLient_ID_Chatroom.put(Integer.parseInt(String.valueOf(Thread.currentThread().getId())), ChatRoom_Client_Info.Name_Chat_Room.get(Msg1Val));
-
-			return Message;
-		}
-		else 
-		{
-			
-			Message.setErrorCode(1);
-			Message.setErrorDescription("Not valid Message");
-			return Message;
-		}
-	}
-	public String Reply_Client_Msg(Protocol_Messages Put_In_Bundle) {
-
-
-
-	Protocol_Messages Output_Message = new Protocol_Messages();
-	Output_Message.setJoinedChatroom(Put_In_Bundle.JOIN_CHATROOM);
-	Output_Message.setServerIp(Configuration_Server.IP_Of_Server);
-	Output_Message.setPORT(Configuration_Server.PORT);
-	Output_Message.setRoomRef(ChatRoom_Client_Info.Name_Chat_Room.get(Put_In_Bundle.JOIN_CHATROOM));
-	
-	Output_Message.setJoinId(Integer.parseInt(String.valueOf(Thread.currentThread().getId())));		//We are using Thread ID as JOIN_ID
-	String Client_Reply = Output_Message.Join_ReplyTo_Client();
-
-		return Client_Reply;
-
-	}
 	public static void Load_Configurations() {
 		Properties Attributes = new Properties();
 
@@ -148,7 +93,103 @@ public class Chat_Protocol {
 		
 		System.out.println("thread end ID "+Thread.currentThread().getId());
 	}
+	
+	public Boolean Func_JoinMsg(String Msg1,String Msg2,String Msg3,String Msg4, PrintStream printStream) {
+		System.out.println("Inside Chat_Protocol Join Msg");
+		Protocol_Messages proto_msg = new Protocol_Messages();
+		
+		if(Msg1.startsWith("JOIN_CHATROOM") &&
+				Msg2.startsWith("CLIENT_IP") &&
+				Msg3.startsWith("PORT") &&
+				Msg4.startsWith("CLIENT_NAME")) {
 
+			String[] parts = Msg1.split(": ");
+			String Msg1Val = parts[1];
+			parts = Msg2.split(": ");
+			String Msg2Val = parts[1];
+			parts = Msg3.split(": ");
+			String Msg3Val = parts[1];
+			parts = Msg4.split(": ");
+			String Msg4Val = parts[1];
+
+
+		
+			if(!ChatRoom_Client_Info.Name_Chat_Room.containsKey(Msg1Val))
+			{
+				ChatRoom_Client_Info.Name_Chat_Room.put(Msg1Val, ChatRoom_Client_Info.Unique_ChatRoom_ID);
+				ChatRoom_Client_Info.Inv_Name_Chat_Room.put(ChatRoom_Client_Info.Unique_ChatRoom_ID, Msg1Val);
+				ChatRoom_Client_Info.Unique_ChatRoom_ID++;
+			}
+			proto_msg.setJOIN_CHATROOM(Msg1Val);
+			proto_msg.setCLIENT_IP(Msg2Val);
+			proto_msg.setPORT(Msg3Val);
+			proto_msg.setCLIENT_NAME(Msg4Val);
+
+			
+			Set<Integer> roomRefSet = new HashSet<Integer>();
+			if(ChatRoom_Client_Info.CLient_ID_Chatroom.get(Integer.parseInt(String.valueOf(Thread.currentThread().getId()))) != null){
+				roomRefSet = ChatRoom_Client_Info.CLient_ID_Chatroom.get(Integer.parseInt(String.valueOf(Thread.currentThread().getId())));
+			}
+			roomRefSet.add(ChatRoom_Client_Info.Name_Chat_Room.get(Msg1Val));
+
+			ChatRoom_Client_Info.Message_Send_Client.put(Integer.parseInt(String.valueOf(Thread.currentThread().getId())),printStream);
+			ChatRoom_Client_Info.CLient_ID_Chatroom.put(Integer.parseInt(String.valueOf(Thread.currentThread().getId())), roomRefSet);
+			
+			Set<Integer> cidList = new HashSet<Integer>();
+			if(null!= ChatRoom_Client_Info.CLient_Names_Chatroom.get(Msg4Val)&& !ChatRoom_Client_Info.CLient_Names_Chatroom.get(Msg4Val).isEmpty())
+				cidList = ChatRoom_Client_Info.CLient_Names_Chatroom.get(Msg4Val);
+			cidList.add(Integer.parseInt(String.valueOf(Thread.currentThread().getId())));
+			ChatRoom_Client_Info.CLient_Names_Chatroom.put(Msg4Val,cidList);
+			
+			String outMessage = Join_Reply_Msg(proto_msg);
+			printStream.print(outMessage);
+			
+			//System.out.println("Output  "+printStream+" JOIN_CHATROOM\n" +  outMessage);
+			
+			PrintStream obj2;
+			String string = "CHAT: "+ ChatRoom_Client_Info.Name_Chat_Room.get(Msg1Val) +
+					"\nCLIENT_NAME: "+Msg4Val+
+					"\nMESSAGE: "+ Msg4Val;
+			
+			for (Entry<Integer, PrintStream> entry : ChatRoom_Client_Info.Message_Send_Client.entrySet()) {
+				System.out.println(entry.getKey().toString());
+				if(ChatRoom_Client_Info.CLient_ID_Chatroom.get(entry.getKey()).contains(ChatRoom_Client_Info.Name_Chat_Room.get(Msg1Val))) {
+					obj2 = entry.getValue();
+					if(printStream!=obj2){
+						obj2.println(string);
+						//System.out.println("JOINED_CHATROOMS\n" +  string);
+					}
+				}
+			}
+			printStream.println(string);
+			System.out.println("Output  "+printStream+"  JOIN_CHATROOM\n" +  string);
+			System.out.println("******End  "+Thread.currentThread().getId()+" : Processing Join Message******");
+			return true;
+		}
+		else {
+			System.out.println("****ERROR "+Thread.currentThread().getId()+" :  Processing Join Message*****");
+			proto_msg.setErrorCode(1);
+			proto_msg.setErrorDescription("Input Message not valid");
+			return false;
+		}
+
+	}
+	
+	public String Join_Reply_Msg(Protocol_Messages input) {
+		System.out.println("In Join_Reply_Msg ChatProtocol Thread Start ID "+Thread.currentThread().getId());
+
+
+		Protocol_Messages proto_msg = new Protocol_Messages();
+		proto_msg.setJoinedChatroom(input.JOIN_CHATROOM);
+		proto_msg.setServerIp(Configuration_Server.IP_Of_Server);
+		proto_msg.setPORT(Configuration_Server.PORT);
+		proto_msg.setRoomRef(Integer.parseInt(ChatRoom_Client_Info.Name_Chat_Room.get(input.JOIN_CHATROOM).toString()));
+		proto_msg.setJoinId(Integer.parseInt(String.valueOf(Thread.currentThread().getId())));		
+		String join_reply = proto_msg.Join_ReplyTo_Client();
+		System.out.println("In Join_Reply_Msg ChatProtocol Thread end ID"+Thread.currentThread().getId());
+		return join_reply;
+
+	}
 
 
 

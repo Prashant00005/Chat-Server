@@ -128,6 +128,15 @@ class Thread_Client extends Thread {
 					System.out.println("Client first inputs hello msg with wrong spelling :)" + Accept_String[0]);
 				  }
 				  
+				  else if(Accept_String[0].startsWith("JOIN_CHATROOM: ")) 
+				  
+				  {
+					  Accept_String[1] = inputStream.readLine();
+					  Accept_String[2] = inputStream.readLine();
+					  Accept_String[3] = inputStream.readLine();
+					  System.out.println("Join message from client is \n"+Accept_String[0]+Accept_String[1]+Accept_String[2]+Accept_String[3]);
+				  }
+				  
 				  new SameClient_WriteThread(printStream,Accept_String).start();
 				
 				
@@ -147,7 +156,7 @@ class Thread_Client extends Thread {
 			
 			
 		} 
-		catch (Exception MTE) 
+		catch (IOException MTE) 
 			{
 				System.out.println("Inside Catch ::Main Thread Run " + MTE);
 				MTE.printStackTrace();

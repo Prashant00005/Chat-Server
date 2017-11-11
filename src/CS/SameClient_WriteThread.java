@@ -22,10 +22,17 @@ public class SameClient_WriteThread extends Thread {
 
 		if(Accept_String[0].startsWith("HELO ")) 
 		{
-			System.out.println("Thread writer ID Start"+Thread.currentThread().getId());
+			System.out.println("Helo Msg Thread writer ID Start"+Thread.currentThread().getId());
 			cp.Func_HelloMsg(Accept_String[0],printStream);
-			System.out.println("Thread writer ID End"+Thread.currentThread().getId());
+			System.out.println("Helo Msg Thread writer ID End"+Thread.currentThread().getId());
 			return;
+		}
+		if(Accept_String[0].startsWith("JOIN_CHATROOM: ")) 
+		{
+			System.out.println("Join Msg Thread writer ID Start"+Thread.currentThread().getId());
+			cp.Func_JoinMsg(Accept_String[0],Accept_String[1],Accept_String[2],Accept_String[3],printStream);
+			System.out.println("Join Msg Thread writer ID End"+Thread.currentThread().getId());
+			//os.close();
 		}
 	}
 
