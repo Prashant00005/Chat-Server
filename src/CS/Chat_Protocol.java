@@ -89,7 +89,7 @@ public class Chat_Protocol {
 		Configuration_Server.PORT = Attributes.getProperty("PORT");
 	}
 	
-public Protocol_Messages Parse_Chat_Messages(String Msg1, String Msg2, String Msg3, String Msg4, PrintStream printStream) {
+	public Protocol_Messages Parse_Chat_Messages(String Msg1, String Msg2, String Msg3, String Msg4, PrintStream printStream) {
 	
 	Protocol_Messages Message = new Protocol_Messages();
 	
@@ -137,4 +137,19 @@ public Protocol_Messages Parse_Chat_Messages(String Msg1, String Msg2, String Ms
 			return Message;
 		}
 	}
+
+	public void Func_HelloMsg(String str, PrintStream printStream) 
+	{
+		String string=null;
+		System.out.println("In Func_HelloMsg thread start ID"+Thread.currentThread().getId());
+		
+		string = str + "\nIP: 134.226.50.55\nPort: 8099\nStudentID: 17317559";
+		printStream.print(string);
+		
+		System.out.println("thread end ID "+Thread.currentThread().getId());
+	}
+
+
+
+
 }

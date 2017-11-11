@@ -1,10 +1,11 @@
 package CS;
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.net.Socket;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 
 public class ChatServer {
@@ -18,15 +19,15 @@ public class ChatServer {
 //Default value of the number of clients that can connect to our server is 15
 	private static final int Max_Client = 15;
 	
-private static final clientThread[] threads = new clientThread[Max_Client];
+private static final Thread_Client[] threads = new Thread_Client[Max_Client];
 
 	public static void main(String args[]) {
 
-		Chat_Protocol.Load_Configurations(); //To set our Server IP and Port Number
+		//Chat_Protocol.Load_Configurations(); //To set our Server IP and Port Number
 		ChatRoom_Client_Info.Unique_ChatRoom_ID = 0;
-		String Arg_IP = "localhost";
+		String Arg_IP = "127.0.0.1";
 		//Default PPort Number
-		int Arg_Port = 2235;
+		int Arg_Port = 8099;
 		
 		if (args.length < 1)  //Checks whether command line argument has been passed or not
 		{  //
@@ -43,7 +44,7 @@ private static final clientThread[] threads = new clientThread[Max_Client];
 		try 
 		{
 			InetAddress Inet_Address = InetAddress.getByName(Arg_IP);
-			server_socket = new ServerSocket(Arg_Port,50,Inet_Address);
+			server_socket = new ServerSocket(Arg_Port);
 			
 		} 
 		catch (IOException e) 
@@ -63,7 +64,7 @@ private static final clientThread[] threads = new clientThread[Max_Client];
 					{
 						if (threads[i] == null) 
 						{
-							(threads[i] = new clientThread(client_socket, threads)).start();
+							(threads[i] = new Thread_Client(client_socket, threads)).start();
 							break;
 						}
 					}
@@ -87,70 +88,52 @@ private static final clientThread[] threads = new clientThread[Max_Client];
 }
 
 
-class clientThread extends Thread {
+class Thread_Client extends Thread {
 
-	private String Name_Of_Client = null;
-	private DataInputStream inputStream = null;
+//	private String Name_Of_Client = null;
+	private BufferedReader inputStream = null;
 	private PrintStream printStream = null;
 	private Socket client_socket = null;
-	private final clientThread[] Client_Thread;
-	private int Max_Client;
+//	private final clientThread[] Client_Thread;
+//	private int Max_Client;
 
 
-	public clientThread(Socket client_socket, clientThread[] threads) {
+	public Thread_Client(Socket client_socket, Thread_Client[] threads) {
 		this.client_socket = client_socket;
-		this.Client_Thread = threads;
-		Max_Client = threads.length;
+//		this.Client_Thread = threads;
+//		Max_Client = threads.length;
 
 	}
 
 	public void run() 
 	{
-			int Max_Client = this.Max_Client;
-			clientThread[] Client_Thread = this.Client_Thread;
-			Chat_Protocol CP_Obj = new Chat_Protocol();
-			Protocol_Messages Put_In_Bundle = new Protocol_Messages();
-			String Output_Message =null;
+			//int Max_Client = this.Max_Client;
+			//clientThread[] Client_Thread = this.Client_Thread;
+			//Chat_Protocol CP_Obj = new Chat_Protocol();
+			//Protocol_Messages Put_In_Bundle = new Protocol_Messages();
+		
+			
+			String Accept_String[] = new String[100] ;
 			
 		try 
 			{
+			
+			inputStream = new BufferedReader(new InputStreamReader(client_socket.getInputStream()));
+			printStream = new PrintStream(client_socket.getOutputStream());
+			while (true)
+			{
+				Accept_String[0]=inputStream.readLine();
+				  if(Accept_String[0].startsWith("HELO ")) 
+				  {
+					System.out.println("Client first inputs hello msg with wrong spelling :)" + Accept_String[0]);
+				  }
+				  
+				  new SameClient_WriteThread(printStream,Accept_String).start();
 				
-					//Creating Data Input Stream and Output Stream for client
-					
-					inputStream = new DataInputStream(client_socket.getInputStream());
-					
-					printStream = new PrintStream(client_socket.getOutputStream());
-					
-		
-					String Msg1= inputStream.readLine();
-					String Msg2= inputStream.readLine();
-					String Msg3= inputStream.readLine();
-					String Msg4= inputStream.readLine();
-					
-				if(Msg1.startsWith("JOIN_CHATROOM: ")) 
-				{
-					Put_In_Bundle = CP_Obj.Parse_Client_Msg(Msg1,Msg2,Msg3,Msg4,printStream);
-					Output_Message = CP_Obj.Reply_Client_Msg(Put_In_Bundle);
-					printStream.print(Output_Message);
-					System.out.println("\nAfter decoding: "+Output_Message);
-				}
 				
-				else if(Msg1.startsWith("LEFT_CHATROOM: ")) 
-				{
-		
-				}
-				else if(Msg1.startsWith("CHAT: ")) 
-				
-				{
-					
-					Put_In_Bundle = CP_Obj.Parse_Chat_Messages(Msg1,Msg2,Msg3,Msg4,printStream);
-					printStream.print(Output_Message);
-					System.out.println("\nAfter decoding: "+Output_Message);
-				}
-		
-		
+			}	
 				//We need to make the current thread to zero / null, and now our server can accept new clients
-			synchronized (this) 
+			/*synchronized (this) 
 			{
 				for (int i = 0; i < Max_Client; i++) 
 				{
@@ -159,17 +142,37 @@ class clientThread extends Thread {
 						Client_Thread[i] = null;
 					}
 				}
+			}*/
+			
+			
+			
+		} 
+		catch (Exception MTE) 
+			{
+				System.out.println("Inside Catch ::Main Thread Run " + MTE);
+				MTE.printStackTrace();
+			}
+		finally{
+			try {
+				//Closing all the open connections
+				System.out.println("In finally :: main class ");
+				inputStream.close();
+				printStream.close();
+				client_socket.close();
+			} 
+			
+			catch (IOException IOE)
+			{
+					System.out.println("Main thread catching IO exception" + IOE);
+					IOE.printStackTrace();
+			}
+			catch(NullPointerException Exc){
+				System.out.println("Main thread catching null pointer exception" + Exc);
+				Exc.printStackTrace();
 			}
 			
-			//Closing all the open connections
-			inputStream.close();
-			printStream.close();
-			client_socket.close();
-		} 
-		catch (IOException e) 
-			{
-				System.out.println("Inside Catch ::Main Thread Run ");
-			}
+
+		}
 	}
 
 
