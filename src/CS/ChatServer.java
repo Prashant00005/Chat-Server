@@ -1,8 +1,8 @@
 package CS;
-import java.io.BufferedReader;
+ import java.io.BufferedReader;
 import java.net.Socket;
 import java.io.PrintStream;
-import java.net.InetAddress;
+
 import java.net.ServerSocket;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,7 +23,7 @@ private static final Thread_Client[] threads = new Thread_Client[Max_Client];
 
 	public static void main(String args[]) {
 
-		//Chat_Protocol.Load_Configurations(); //To set our Server IP and Port Number
+		Chat_Protocol.Load_Configurations(); //To set our Server IP and Port Number
 		ChatRoom_Client_Info.Unique_ChatRoom_ID = 0;
 		String Arg_IP = "127.0.0.1";
 		//Default PPort Number
@@ -43,7 +43,6 @@ private static final Thread_Client[] threads = new Thread_Client[Max_Client];
 		
 		try 
 		{
-			InetAddress Inet_Address = InetAddress.getByName(Arg_IP);
 			server_socket = new ServerSocket(Arg_Port);
 			
 		} 
@@ -100,19 +99,11 @@ class Thread_Client extends Thread {
 
 	public Thread_Client(Socket client_socket, Thread_Client[] threads) {
 		this.client_socket = client_socket;
-//		this.Client_Thread = threads;
-//		Max_Client = threads.length;
 
 	}
 
 	public void run() 
 	{
-			//int Max_Client = this.Max_Client;
-			//clientThread[] Client_Thread = this.Client_Thread;
-			//Chat_Protocol CP_Obj = new Chat_Protocol();
-			//Protocol_Messages Put_In_Bundle = new Protocol_Messages();
-		
-			
 			String Accept_String[] = new String[100] ;
 			
 		try 
@@ -135,6 +126,8 @@ class Thread_Client extends Thread {
 					  Accept_String[2] = inputStream.readLine();
 					  Accept_String[3] = inputStream.readLine();
 					  System.out.println("Join message from client is \n"+Accept_String[0]+Accept_String[1]+Accept_String[2]+Accept_String[3]);
+				  }else{
+					  System.out.println("ERRRORRRR :::"+Accept_String[0]);
 				  }
 				  
 				  new SameClient_WriteThread(printStream,Accept_String).start();
@@ -165,20 +158,17 @@ class Thread_Client extends Thread {
 			try {
 				//Closing all the open connections
 				System.out.println("In finally :: main class ");
-				inputStream.close();
-				printStream.close();
-				client_socket.close();
+				//inputStream.close();
+				//printStream.close();
+				//client_socket.close();
 			} 
 			
-			catch (IOException IOE)
+			catch (Exception IOE)
 			{
 					System.out.println("Main thread catching IO exception" + IOE);
 					IOE.printStackTrace();
 			}
-			catch(NullPointerException Exc){
-				System.out.println("Main thread catching null pointer exception" + Exc);
-				Exc.printStackTrace();
-			}
+			
 			
 
 		}

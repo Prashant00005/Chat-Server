@@ -1,9 +1,8 @@
 package CS;
 
-import java.io.DataInputStream;
-import java.io.IOException;
+
 import java.io.PrintStream;
-import java.net.Socket;
+
 
 public class SameClient_WriteThread extends Thread {
 
