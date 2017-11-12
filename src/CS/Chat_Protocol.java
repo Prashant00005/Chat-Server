@@ -2,6 +2,7 @@ package CS;
 
 import java.io.PrintStream;
 import java.util.Map.Entry;
+
 import java.util.HashSet;
 
 import java.util.Set;
@@ -99,9 +100,9 @@ public class Chat_Protocol {
 		{
 
 			String[] sub_Msg = Msg1.split(": "); String Msg1Val = sub_Msg[1]; 
-			String Msg2Val = sub_Msg[1];  sub_Msg = Msg2.split(": "); 
-			String Msg3Val = sub_Msg[1];  sub_Msg = Msg3.split(": "); 
-			String Msg4Val = sub_Msg[1];  sub_Msg = Msg4.split(": "); 
+			sub_Msg = Msg2.split(": ");		String Msg2Val = sub_Msg[1];   
+			sub_Msg = Msg3.split(": ");		String Msg3Val = sub_Msg[1];   
+			sub_Msg = Msg4.split(": "); 	String Msg4Val = sub_Msg[1];   
 
 		
 			if(!ChatRoom_Client_Info.Name_Chat_Room.containsKey(Msg1Val))
@@ -201,6 +202,118 @@ public class Chat_Protocol {
 		String join_reply = proto_msg.Join_ReplyTo_Client();
 		System.out.println("In Join_Reply_Msg ChatProtocol Thread end ID"+Thread.currentThread().getId());
 		return join_reply;
+
+	}
+	
+	public Boolean Func_LeaveMsg(String Msg1, String Msg2, String Msg3, PrintStream printStream) 
+	
+	{
+		System.out.println("Inside Chat Protocol :: ");
+		
+		if(Msg1.startsWith("LEAVE_CHATROOM") && Msg2.startsWith("JOIN_ID") && Msg3.startsWith("CLIENT_NAME")) 
+		{		
+			String[] sub_Msg = Msg1.split(": ");
+			String Msg1Val = sub_Msg[1];
+			sub_Msg = Msg2.split(": ");
+			String Msg2Val = sub_Msg[1];
+			sub_Msg = Msg3.split(": ");
+			String Msg3Val = sub_Msg[1];
+
+
+			
+			if(!ChatRoom_Client_Info.Inv_Name_Chat_Room.containsKey(Integer.parseInt(Msg1Val))) 
+			
+			{ 
+				
+				System.out.println("Error in leave message");
+				return false;
+			}
+			
+			PrintStream obj2;
+			String str1=null;
+			
+			str1 = "LEFT_CHATROOM: "+Msg1Val +"\n" 	+"JOIN_ID: "+Msg2Val+"\n"; 
+
+			
+			String str2 = "CHAT: "+Msg1Val +"\n" +"CLIENT_NAME: "+ Msg3Val +"\n" +"MESSAGE: "+ Msg3Val;
+			
+			str1 = str1 + str2;
+			
+			System.out.println("checking output"+printStream+" leave chatroom : \n" +  str1);
+			
+			printStream.println(str1);
+
+			
+			Set<Integer> temp_Set = ChatRoom_Client_Info.CLient_ID_Chatroom.get(Integer.parseInt(Msg2Val));
+			
+			temp_Set.remove(Msg1Val);
+			
+			ChatRoom_Client_Info.CLient_ID_Chatroom.remove(Integer.parseInt(Msg2Val));
+			
+			ChatRoom_Client_Info.CLient_ID_Chatroom.put(Integer.parseInt(Msg2Val),temp_Set);
+			ChatRoom_Client_Info.Message_Send_Client.remove(Integer.parseInt(Msg2Val));
+
+
+			//Scan all the output messages and see if they are from this specific chat group*/
+			
+			
+			int key=-1;
+			
+			
+			try{
+
+				for (Entry<Integer, PrintStream> iterate : ChatRoom_Client_Info.Message_Send_Client.entrySet()) 
+				
+				{
+					key=-1;
+
+					
+					if(ChatRoom_Client_Info.CLient_ID_Chatroom.get(iterate.getKey()).contains((Integer.parseInt(Msg1Val)))) 
+					{	
+						obj2 = iterate.getValue();
+						key = iterate.getKey();
+						if(obj2!=printStream) 
+						{
+							obj2.println(str2);
+						}
+					}
+				}
+			}
+			catch(Exception exc)
+			{
+				System.out.println("Exception in processing leave message" + exc);
+				exc.printStackTrace();
+			}
+			
+			finally
+			{
+				if(key > -1)
+				
+				{
+					Set<Integer> temp_Set1 = ChatRoom_Client_Info.CLient_ID_Chatroom.get(key);
+					ChatRoom_Client_Info.CLient_ID_Chatroom.remove(key);
+					if(temp_Set1!=null)
+					
+					{
+						temp_Set1.remove(Msg1Val);
+						ChatRoom_Client_Info.CLient_ID_Chatroom.put(key,temp_Set1);
+					}
+					
+					ChatRoom_Client_Info.Message_Send_Client.remove(key);
+
+
+				}
+			}
+			
+			return true;
+		}
+		
+		else 
+		{
+			System.out.println("Error in Func_LeaveMsg");
+		
+			return false;
+		}
 
 	}
 

@@ -126,7 +126,20 @@ class Thread_Client extends Thread {
 					  Accept_String[2] = inputStream.readLine();
 					  Accept_String[3] = inputStream.readLine();
 					  System.out.println("Join message from client is \n"+Accept_String[0]+Accept_String[1]+Accept_String[2]+Accept_String[3]);
-				  }else{
+				  }
+				  
+				  else if(Accept_String[0].startsWith("LEAVE_CHATROOM: ")) 
+				  
+				  {
+					  Accept_String[1] = inputStream.readLine();
+					  Accept_String[2] = inputStream.readLine();
+						System.out.println("Inside MAin :: Leave Chatroom");
+				  }
+				  
+				  
+				  else
+				  
+				  {
 					  System.out.println("ERRRORRRR :::"+Accept_String[0]);
 				  }
 				  
@@ -158,9 +171,9 @@ class Thread_Client extends Thread {
 			try {
 				//Closing all the open connections
 				System.out.println("In finally :: main class ");
-				//inputStream.close();
-				//printStream.close();
-				//client_socket.close();
+				inputStream.close();
+				printStream.close();
+				client_socket.close();
 			} 
 			
 			catch (Exception IOE)
