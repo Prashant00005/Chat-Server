@@ -1,9 +1,8 @@
 package CS;
 
 import java.io.PrintStream;
-import java.util.Map.Entry;
-
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import java.util.Set;
 
@@ -50,7 +49,7 @@ public class Chat_Protocol {
 				
 				if(!ChatRoom_Client_Info.Name_Chat_Room.containsValue(Msg1Val)) 
 				{
-					Message.setErrorDescription("Not valid Message");
+					Message.setErrorDescription("Message Not valid");
 					Message.setErrorCode(1);
 					
 					return Message;
@@ -73,7 +72,7 @@ public class Chat_Protocol {
 			}
 			else 
 			{
-				Message.setErrorDescription("Not valid Message");
+				Message.setErrorDescription("Message not Valid");
 				Message.setErrorCode(1);
 				
 				return Message;
@@ -212,12 +211,9 @@ public class Chat_Protocol {
 		
 		if(Msg1.startsWith("LEAVE_CHATROOM") && Msg2.startsWith("JOIN_ID") && Msg3.startsWith("CLIENT_NAME")) 
 		{		
-			String[] sub_Msg = Msg1.split(": ");
-			String Msg1Val = sub_Msg[1];
-			sub_Msg = Msg2.split(": ");
-			String Msg2Val = sub_Msg[1];
-			sub_Msg = Msg3.split(": ");
-			String Msg3Val = sub_Msg[1];
+			String[] sub_Msg = Msg1.split(": "); 	String Msg1Val = sub_Msg[1];
+			sub_Msg = Msg2.split(": "); 			String Msg2Val = sub_Msg[1];
+			sub_Msg = Msg3.split(": ");				String Msg3Val = sub_Msg[1];
 
 
 			
@@ -315,6 +311,62 @@ public class Chat_Protocol {
 			return false;
 		}
 
+	}
+	
+	
+	public boolean Func_ChatMsg(String Msg1, String Msg2, String Msg3, String Msg4, PrintStream printStream) {
+		
+		System.out.println("In Func_ChatMsg :: ");
+		
+		Protocol_Messages proto_msg = new Protocol_Messages();
+		if(Msg1.startsWith("CHAT") && Msg2.startsWith("JOIN_ID") && Msg3.startsWith("CLIENT_NAME") && Msg4.startsWith("MESSAGE")) 
+		
+		{
+				
+				String[] sub_Msg = Msg1.split(": ");      String Msg1Val = sub_Msg[1];
+				sub_Msg = Msg2.split(": ");				  sub_Msg = Msg3.split(": ");
+				String Msg3Val = sub_Msg[1];				  sub_Msg = Msg4.split(": ");
+				String Msg4Val = sub_Msg[1];				  
+		
+		
+				if(!ChatRoom_Client_Info.Inv_Name_Chat_Room.containsKey(Integer.parseInt(Msg1Val))) { 
+					proto_msg.setErrorCode(1);
+					proto_msg.setErrorDescription("Input Message not valid");
+					System.out.println("****ERROR 1:  Processing Chat Message*****");
+					return false;
+				}
+				PrintStream obj2;
+				String str1=null;
+		
+				str1 = "CHAT: "+Msg1Val +"\n"  +"CLIENT_NAME: "+Msg3Val +"\n" +"MESSAGE: "+ Msg4Val +"\n\n"; printStream.print(str1);
+				
+				
+				for (Entry<Integer, PrintStream> iterate : ChatRoom_Client_Info.Message_Send_Client.entrySet()) {
+					
+					
+					if(ChatRoom_Client_Info.CLient_ID_Chatroom.get(iterate.getKey()).contains(Integer.parseInt(Msg1Val))) 
+					
+					{
+						obj2 = iterate.getValue();
+						if(obj2 != printStream)	
+							
+							obj2.print(str1);
+		
+					}
+				}
+		
+				return true;
+		}
+		
+		else 
+		{
+				System.out.println("Error in Func_ChatMsg");
+				
+				proto_msg.setErrorDescription("Message not Valid");
+				proto_msg.setErrorCode(1);
+				
+				return false;
+		}
 	}
 
 

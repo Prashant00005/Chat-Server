@@ -135,6 +135,22 @@ class Thread_Client extends Thread {
 					  Accept_String[2] = inputStream.readLine();
 						System.out.println("Inside MAin :: Leave Chatroom");
 				  }
+				  else if(Accept_String[0].startsWith("CHAT: ")) 
+				  
+				  {
+					  Accept_String[1] = inputStream.readLine();
+					  Accept_String[2] = inputStream.readLine();
+
+						int i = 3;
+						while(true){
+							Accept_String[i] = inputStream.readLine();
+							if(Accept_String[i].isEmpty()){
+								break;
+							}
+							i++;
+						}
+						System.out.println("Inside Main CHAT and msg received is :\n"+Accept_String[0]+Accept_String[1]+Accept_String[2]+Accept_String[3]+Accept_String[4]);
+					}
 				  
 				  
 				  else

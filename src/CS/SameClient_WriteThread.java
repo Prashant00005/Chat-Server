@@ -48,6 +48,12 @@ public class SameClient_WriteThread extends Thread {
 				return;
 			}
 			
+			else if(Accept_String[0].startsWith("CHAT: ")) {
+				System.out.println("Chat Msg Thread writer ID Start"+Thread.currentThread().getId());
+				cp.Func_ChatMsg(Accept_String[0],Accept_String[1],Accept_String[2],Accept_String[3],printStream);
+				System.out.println("Chat Msg Thread writer ID End"+Thread.currentThread().getId());
+			}
+			
 	}
 
 	
