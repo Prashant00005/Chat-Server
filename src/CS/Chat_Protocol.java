@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
+
 import java.util.Set;
 
 
@@ -253,7 +254,7 @@ public class Chat_Protocol {
 			//Scan all the output messages and see if they are from this specific chat group*/
 			
 			
-			int key=-1;
+			int m=-1;
 			
 			
 			try{
@@ -261,13 +262,13 @@ public class Chat_Protocol {
 				for (Entry<Integer, PrintStream> iterate : ChatRoom_Client_Info.Message_Send_Client.entrySet()) 
 				
 				{
-					key=-1;
+					m=-1;
 
 					
 					if(ChatRoom_Client_Info.CLient_ID_Chatroom.get(iterate.getKey()).contains((Integer.parseInt(Msg1Val)))) 
 					{	
 						obj2 = iterate.getValue();
-						key = iterate.getKey();
+						m = iterate.getKey();
 						if(obj2!=printStream) 
 						{
 							obj2.println(str2);
@@ -283,19 +284,19 @@ public class Chat_Protocol {
 			
 			finally
 			{
-				if(key > -1)
+				if(m > -1)
 				
 				{
-					Set<Integer> temp_Set1 = ChatRoom_Client_Info.CLient_ID_Chatroom.get(key);
-					ChatRoom_Client_Info.CLient_ID_Chatroom.remove(key);
+					Set<Integer> temp_Set1 = ChatRoom_Client_Info.CLient_ID_Chatroom.get(m);
+					ChatRoom_Client_Info.CLient_ID_Chatroom.remove(m);
 					if(temp_Set1!=null)
 					
 					{
 						temp_Set1.remove(Msg1Val);
-						ChatRoom_Client_Info.CLient_ID_Chatroom.put(key,temp_Set1);
+						ChatRoom_Client_Info.CLient_ID_Chatroom.put(m,temp_Set1);
 					}
 					
-					ChatRoom_Client_Info.Message_Send_Client.remove(key);
+					ChatRoom_Client_Info.Message_Send_Client.remove(m);
 
 
 				}
@@ -336,6 +337,7 @@ public class Chat_Protocol {
 					return false;
 				}
 				PrintStream obj2;
+				
 				String str1=null;
 		
 				str1 = "CHAT: "+Msg1Val +"\n"  +"CLIENT_NAME: "+Msg3Val +"\n" +"MESSAGE: "+ Msg4Val +"\n\n"; printStream.print(str1);
@@ -366,6 +368,55 @@ public class Chat_Protocol {
 				proto_msg.setErrorCode(1);
 				
 				return false;
+		}
+	}
+	
+	public void Func_DisconnectMsg(String Msg1,String Msg2, String Msg3, PrintStream printStream) 
+	
+	{
+		
+		if(Msg1.startsWith("DISCONNECT") && Msg2.startsWith("PORT") && Msg3.startsWith("CLIENT_NAME")) 
+		
+		{
+			String[] sub_Msg = Msg1.split(": ");	 	sub_Msg = Msg2.split(": ");
+			String Msg2Val = sub_Msg[1]; 				sub_Msg = Msg3.split(": ");
+			String Msg3Val = sub_Msg[1];
+
+
+
+			
+			//os.println(strmsg2);
+
+			Set<Integer> cidList = ChatRoom_Client_Info.CLient_Names_Chatroom.get(Msg3Val);
+			Set<Integer> roomRefSet = new HashSet<Integer>();
+			for(Integer cid : cidList){
+				if(null!= ChatRoom_Client_Info.CLient_ID_Chatroom.get(cid)){
+					roomRefSet.addAll(ChatRoom_Client_Info.CLient_ID_Chatroom.get(cid));
+					System.out.println("Got Null in processing disconnect");
+				}
+			}
+			Integer m=-1;
+			for (Entry<Integer, PrintStream> iterate : ChatRoom_Client_Info.Message_Send_Client.entrySet()) {
+			
+				for(Integer entry2 : roomRefSet){
+					if(ChatRoom_Client_Info.CLient_ID_Chatroom.get(iterate.getKey()).contains(entry2)) {	
+						PrintStream obj2 = iterate.getValue();
+						
+						String strmsg2 = "CHAT: "+entry2.toString()+"\n" +"CLIENT_NAME: "+Msg3Val +"\n" +"MESSAGE: "+ Msg3Val;
+						obj2.println(strmsg2);
+						
+						if(obj2 == printStream) {
+
+							m = iterate.getKey();
+						}
+					}
+				}
+			}
+			if(m!=-1){
+				ChatRoom_Client_Info.Message_Send_Client.remove(m);
+				
+				ChatRoom_Client_Info.CLient_ID_Chatroom.remove(m);
+			}
 		}
 	}
 

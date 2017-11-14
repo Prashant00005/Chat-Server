@@ -1,6 +1,8 @@
 package CS;
  import java.io.BufferedReader;
 import java.net.Socket;
+
+
 import java.io.PrintStream;
 
 import java.net.ServerSocket;
@@ -151,7 +153,16 @@ class Thread_Client extends Thread {
 						}
 						System.out.println("Inside Main CHAT and msg received is :\n"+Accept_String[0]+Accept_String[1]+Accept_String[2]+Accept_String[3]+Accept_String[4]);
 					}
-				  
+				  else if(Accept_String[0].startsWith("DISCONNECT: ")){
+					  Accept_String[1] = inputStream.readLine();
+					  Accept_String[2] = inputStream.readLine();
+					  Chat_Protocol cp = new Chat_Protocol();
+						cp.Func_DisconnectMsg(Accept_String[0],Accept_String[1],Accept_String[2],printStream);
+						printStream.close();
+						inputStream.close();
+						client_socket.close();
+						return;
+					}
 				  
 				  else
 				  
@@ -183,6 +194,7 @@ class Thread_Client extends Thread {
 				System.out.println("Inside Catch ::Main Thread Run " + MTE);
 				MTE.printStackTrace();
 			}
+		
 		finally{
 			try {
 				//Closing all the open connections
