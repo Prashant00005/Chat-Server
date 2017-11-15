@@ -163,6 +163,14 @@ class Thread_Client extends Thread {
 						client_socket.close();
 						return;
 					}
+				  else if(Accept_String[0].startsWith("KILL_SERVICE")) {
+						
+					  System.out.println("Inside Kill service  MAIN ::"+Accept_String[0]);
+							inputStream.close();
+							printStream.close();
+							client_socket.close();
+							System.exit(0);
+					}
 				  
 				  else
 				  

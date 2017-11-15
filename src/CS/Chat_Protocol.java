@@ -392,7 +392,7 @@ public class Chat_Protocol {
 			for(Integer cid : cidList){
 				if(null!= ChatRoom_Client_Info.CLient_ID_Chatroom.get(cid)){
 					roomRefSet.addAll(ChatRoom_Client_Info.CLient_ID_Chatroom.get(cid));
-					System.out.println("Got Null in processing disconnect");
+					
 				}
 			}
 			Integer m=-1;
