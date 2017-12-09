@@ -23,7 +23,7 @@ sh compile.sh<br>
 Server Compiled (output from compile.sh file)<br>
 
 Go to Chat-Server/src/Config_Pkg/ and run the following command:<br>
-sh start.sh<br>
+sh start.sh (give port number here as argument)   <br>
 Server Started (output from start.sh file)<br>
 
 # Dependencies:
