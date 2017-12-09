@@ -20,11 +20,11 @@ Open start.sh file (vi start.sh) in the terminal and put the ip address of the s
 
 Now, go to Chat-Server/src/Config_Pkg/ and run the following command:<br>
 sh compile.sh<br>
-Server Started (output from compile.sh file)<br>
+Server Compiled (output from compile.sh file)<br>
 
 Go to Chat-Server/src/Config_Pkg/ and run the following command:<br>
 sh start.sh<br>
-Server compiled (output from start.sh file)<br>
+Server Started (output from start.sh file)<br>
 
 # Dependencies:
 Java 1.8<br>
