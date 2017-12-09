@@ -27,5 +27,5 @@ sh start.sh<br>
 Server compiled (output from start.sh file)<br>
 
 # Dependencies:
-Java 1.8
+Java 1.8<br>
 dos2unix
