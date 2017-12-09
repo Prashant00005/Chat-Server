@@ -1,6 +1,6 @@
 # Chat-Server
 
-Name: Prashant Aggarwal
+Name: Prashant Aggarwal<br>
 Email: aggarwap@tcd.ie
 Id: 17317559
 
